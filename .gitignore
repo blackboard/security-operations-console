@@ -14,11 +14,12 @@ node_modules/
 public/coverage/
 public/javadoc/
 public/*.css
+!public/lib
 test/reports/
 test/client/
 
 #Third party libraries
-public/amcharts/
+*amcharts/
 
 #Webstorm config files
 .idea/
