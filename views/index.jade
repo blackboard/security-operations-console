@@ -1,0 +1,134 @@
+extends layout
+
+block title
+  title Issues List
+
+block includes
+  link( rel='stylesheet', href='/issues.css' )
+  script( type='text/javascript', src='/lib/esapi4js-0.1.3/esapi-compressed.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/resources/i18n/ESAPI_Standard_en_US.properties.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/resources/Base.esapi.properties.js' )
+  script( type='text/javascript' )
+    Base.esapi.properties.application.Name = "My Application v1.0";
+    org.owasp.esapi.ESAPI.initialize();
+    
+    function changeTextBox( old, div ) {
+      console.log( old );
+      var newTextBox = "";
+      if( old.attr( "value" ) == "valid" ) {
+        newTextBox = '<input type="text" name="description" class="textbox" size="92"></input>'
+      }
+      else if( old.attr( "value" ) == "false_positive" ) {
+        newTextBox = '<textarea name="description" rows="5" class="textbox" cols="70"></textarea>'
+      }
+      
+      div.children().remove();
+      div.append( newTextBox );
+    }
+    
+block mainContent
+  include error.jade
+  table.issues    
+    tr.issues 
+      th.issues Date Found
+      th.issues Url
+      th.issues Change to Entity
+      th.issues Review Status
+    for issue in scanners
+      if issue.FirstIdentified != null
+        tr.issues( id="#{ issue._id }" )
+          td.issues
+            if issue.FirstIdentified.Date != null 
+              div.date #{ issue.FirstIdentified.Date } 
+          td.issues 
+            div.issues #{ issue.Url }
+          td.issues 
+            if issue.FirstIdentified.Source == "AppScan"
+              div.issues #{ issue.Difference }
+            else if issue.FirstIdentified.Source == "Burp"
+              div.issues #{ issue.Altered }
+          td.issues 
+            if issue.reviewed
+              div.cwe #{ issue.reviewed.type }      
+            else
+              div.cwe Unreviewed
+          if updatePermission == true
+            script 
+              var html = "";
+              var description = '"">';
+              var inputType = 'input type="text" name="description" size="92" class="textbox" value=';
+              var close = '</input>';
+              html += '<div class="metadata">Date Found: ' + new Date( "#{ issue.FirstIdentified.Date }" ).toDateString() + '<br />' +
+                      'Galileo Scan PID: #{ issue.FirstIdentified.ScanPid } <br />' +
+                      'Blackboard Version: #{ issue.FirstIdentified.Version } <br />' +
+                      'Scanner Used: #{ issue.FirstIdentified.Source }</div>';
+            if issue.reviewed
+              script  
+                html += '<div class="reviewdata">Reviewed By: #{ issue.reviewed.username } <br />' +
+                        'Reviewed On: #{ issue.reviewed.date_reviewed } </div>';
+            else 
+              script
+                html +='<div class="reviewdata"></div>';
+              script(id="request_" + issue._id)
+                #{ issue.Request }
+            script  
+              if( "#{ issue.FirstIdentified.Source }" == "AppScan" ) {
+                var strings = "#{ issue.Difference }".split( " -&gt; " );
+                var get = '#{ issue[ "GET Parameters" ] }';
+                var post = '#{ issue[ "POST Parameters" ] }';
+                html += '<div class="information"><table class="information"><tr><td>' + 
+                      '<div class="var">ID</div></td><td><div class="val"> #{ issue._id } </div></td></tr>' + 
+                      '<tr><td><div class="var">Url</div></td><td><div class="val">#{ issue.Url }</div></td></tr>' +
+                      '<tr><td><div class="var">Url Parameters</div></td><td><div class="val">' + get + '</div></td></tr>' +
+                      '<tr><td><div class="var">Body(POST) Parameters</div></td><td><div class="val">' + post + '</div></td></tr>' +
+                      '<tr><td><div class="var">Entity Type</div></td><td><div class="val">#{ issue.EntityType }</div></td></tr>' +
+                      '<tr><td><div class="var">Entity Name</div></td><td><div class="val">#{ issue.EntityName }</div></td></tr>' +
+                      '<tr><td><div class="var">Reasoning</div></td><td><div class="val">#{ issue.Reasoning }</div></td></tr>' +
+                      '<tr><td><div class="var">CWE</div></td><td><div class="val">#{ issue.CWE }</div></td></tr>' + 
+                      '<tr><td><div class="var">Entity Change</div></td><td><div class="val">' + 
+                      $ESAPI.encoder().encodeForHTML( strings[ 0 ] ) + ' -&gt; ' + $ESAPI.encoder().encodeForHTML( $ESAPI.encoder().cananicalize( strings[ 1 ] ) ) +
+                      '</div></td></tr></table></div>';
+              }
+              else if( "#{ issue.FirstIdentified.Source }" == "Burp" ) {
+                html += '<div class="information"><table class="information"><tr><td>' + 
+                        '<div class="var">ID</div></td><td><div class="val"> #{ issue._id } </div></td></tr>' + 
+                        '<tr><td><div class="var">Url</div></td><td><div class="val">#{ issue.Url }</div></td></tr>' +
+                        '<tr><td><div class="var">Request</div></td><td><div class="val">' + $( "#request_#{ issue._id }" ).html().replace( new RegExp( "[\r\n]+", "g" ), "<br />") + '</div></td></tr>' +
+                        '<tr><td><div class="var">Entity Type</div></td><td><div class="val">#{ issue.EntityType }</div></td></tr>' +
+                        '<tr><td><div class="var">Entity Name</div></td><td><div class="val">#{ issue.EntityName }</div></td></tr>' +
+                        '<tr><td><div class="var">Entity Change</div></td><td><div class="val">' + 
+                        $ESAPI.encoder().encodeForHTML( $ESAPI.encoder().cananicalize( "#{ issue.Altered }" ) ) + '</div></td></tr>' +
+                        '<tr><td><div class="var">Misc. Additional Info</div></td><td><div class="val">' +
+                        $ESAPI.encoder().encodeForHTML( $ESAPI.encoder().cananicalize( "#{ issue.Misc }" ) ) + '</div></td></tr>' +
+                        '<tr><td><div class="var">Issue Type</div></td><td><div class="val">#{ issue.Issuename }</div></td></tr>' +
+                        '<tr><td><div class="var">Confidence</div></td><td><div class="val">#{ issue.Confidence }</div></td></tr>' +
+                        '<tr><td><div class="var">Severity</div></td><td><div class="val">#{ issue.Severity }</div></td></tr></table></div>';
+              }
+              
+              html += '<div class="reviewForm"><form name="review" action="/index" method="POST">' +
+                      '<input type="hidden" value="#{ _csrf }" name="_csrf" />' +
+                      '<input type="hidden" value="#{ issue._id }" name="reviewedItem"/>' +
+                      '<div class="radio"><input class="radio" type="radio" name="issue_type" value="false_positive"';
+            if issue.reviewed
+              if issue.reviewed.type == "false_positive"
+                script
+                  html += 'checked="checked"';
+                  description = "#{ issue.reviewed.false_positive_reason }";
+                  inputType = 'textarea name="description" rows="5" class="textbox" columns="150">';
+                  close = '</textarea>'
+            script
+              html += '>False Positive</input><input class="radio" type="radio" name="issue_type" value="valid"';
+            if issue.reviewed
+              if issue.reviewed.type == "valid"
+                script
+                  html += 'checked="checked"';
+                  description = '"#{ issue.reviewed.case_number }">';
+            script
+              html += '>Valid Issue</input></div>' +
+                      '<div class="textbox"><' + inputType + description + close + '</div><div class="review"><input type="Submit" class="review" name="review" value="Review" /></form></div>';
+                         
+              $( 'tr##{ issue._id }' ).colorbox( { html: html, width: "65%", height : "80%", onComplete : function() {
+                $( "input.radio" ).change( function() {
+                  changeTextBox( $( this ), $( "div.textbox" ) );
+                } );
+              } } );         

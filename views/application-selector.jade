@@ -1,0 +1,7 @@
+#dropdown-container.dropdown-container.application
+  span#appName Application
+  ul.dropdown
+    for app in projectList
+      li
+        a.application( href="#" ) #{ app._id.app } 
+          span &nbsp;(#{ app.sum })

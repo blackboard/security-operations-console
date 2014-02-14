@@ -1,0 +1,11 @@
+extends bar-graph-report
+
+block selectors
+  script( type="text/javascript", src="/lib/js/static-analysis-common.js" )
+  #dropdown-container.dropdown-container.application
+    span#appName Vulnerability Type
+    ul.dropdown
+      for item in data
+        li
+          a.application( href="#" ) #{ item.categoryName }
+  include static-issue-selectors.jade

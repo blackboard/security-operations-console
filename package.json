@@ -1,0 +1,38 @@
+{
+  "name": "security_operations_console",
+  "description": "A web application to display results from various Security tools, allow flagging of issues as valid and false positive, and reporting on these issues",
+  "version": "2.1.0",
+  "author": "Matthew Saltzman <matthew.saltzman@blackboard.com>",
+  "dependencies": {
+    "config": "0.4.x",
+    "connect-mongodb": "1.x.x",
+    "express": "3.2.x",
+    "hashmap": "1.x.x",
+    "jade": "0.x.x",
+    "js-yaml": "2.x.x",
+    "mongodb": "1.1.x",
+    "nib": "0.x.x",
+    "stylus": "0.x.x",
+    "winston": "0.7.x",
+    "winston-mongodb": "0.x.x",
+    "ws.js": "0.x.x",
+    "xml2js": "0.2.x"
+  },
+  "devDependencies": {
+    "istanbul": "0.x.x",
+    "jasmine-node": "1.9.x",
+    "jsdoc2": "x.x.x",
+    "grunt": "0.4.x",
+    "grunt-jasmine-node" : "0.x.x",
+    "grunt-bg-shell" : "2.x.x",
+    "grunt-jsdoc" : "0.x.x"
+  },
+  "engine": "0.10.x",
+  "readmeFilename": "README.md",
+  "main": "controllers/expressServer.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": "",
+  "license": "BSD"
+}

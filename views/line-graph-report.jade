@@ -1,0 +1,70 @@
+//- Extends the layout template, which in this case keeps the top frame and css the same across all pages
+extends layout
+
+//- Adds the first set of code to the layout, in this case, sets the page title
+block title
+  #{ reportTitle }
+  
+block includes  
+  link( rel='stylesheet', href='/static-issues.css' )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/amcharts.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/serial.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/themes/dark.js" )
+  script( type="text/javascript", src="/lib/js/line-graph-functions.js" )
+  
+  script
+    var data = [], fields = [];
+  
+  
+  for field in valueFields
+    script
+      fields.push( { id : "#{ field.id }", label : "#{ field.label }" } );
+  
+  for item in data
+    script
+      data.push( { categoryName : "#{ item.categoryName }", unreviewedDynamic : "#{ item.unreviewedDynamic }", 
+                   unreviewedStatic : "#{ item.unreviewedStatic }", reviewedDynamic : "#{ item.reviewedDynamic }", 
+                   reviewedStatic : "#{ item.reviewedStatic }", type : "#{ item.type }" } );
+                   
+  script
+    var graphs = [];
+    var lineColors = [ "Orange", "Yellow", "Red", "Pink", "Green" ];
+
+    for( iter in fields )
+    {
+      graphs.push( {
+        type : "line",
+        title : fields[ iter ].label,
+        valueField : fields[ iter ].id,
+        bullet : "round",
+        bulletSize : 4,
+        lineColor : lineColors[ iter ],
+        balloonText : "[[category]]: <b>[[value]]</b>"
+      } );
+    }
+
+    
+    var chart = AmCharts.makeChart( "container", {
+      type : "serial",
+      theme : "dark",
+      dataProvider : data,
+      categoryField : "#{ categoryField }",
+      titles : [ { 'text' : '#{ reportTitle }', size : 14 } ],
+      graphs : graphs,
+      legend: {
+        useGraphSettings : true
+      },
+      categoryAxis : {
+        autoGridCount : true,
+        parseDates : true, 
+        labelRotation : 90
+      }
+    } );
+    
+    chart.addListener( "clickGraphItem", drilldownReport );
+    
+block mainContent
+  //- A section to create a list of selectors to determine the data contained in the report
+  block selectors
+  div( id="container", style="width: 100%; height: 700px" )
+    

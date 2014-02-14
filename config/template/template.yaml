@@ -1,0 +1,47 @@
+database:
+  hostname: #The Mongodb database used by the operations console
+  port: #The port open to connect to mongodb with
+  db_name: #The collection containing dynamic results
+  pool_size: #Number of concurrent connections allowed to mongodb
+
+node:
+  hostname: #Hostname of the console, when up and running
+  httpPort: #Port to redirect to https, default is 80
+  port: #HTTPS port, default is 443
+  root: #Root directory of this project
+  session_cookie:
+    key: #name of the cookie, default is session_id
+    secret: #salt for the cookie
+    timeout: #inactivity session timeout
+  jade:
+    folder: #Full path to the directory containing the jade templates (views)
+  stylus:
+    debug: #Whether or not to include debug level information on stylus compiler issues
+    source_folder: #full path of the stylus files, at the time this was written, a bug forced them to be in the root of the public directory
+    destination_folder: #location of compiled css output, also the root of the public folder
+    warn: #warning log output from stylus
+  ssl:
+    keyFile: #Location of your SSL key file
+    certFile: #Location of your SSL cert file
+  logs: #The following log levels exist: info, warn, error
+    log_root_directory: #full path of the directory to place logs
+    info: #The informational log, containins information about successful actions
+      level: #Log level (default info)
+      filename: #Filename (defualt info.log)
+    security: #The security log, contains information about potential security threats to the console
+      level: #Log level (default info)
+      filename: #Filename (default security.log)
+    exception: #The exceptions log, contains information about exceptions thrown by the console
+      level: #Log level (default info)
+      filename: #Filename (default exceptions.log)
+
+crowd:
+  hostname: #Hostname of the crowd server you are connecting to
+  ssl: #Whether or not the implementation of crowd uses SSL
+  url: #The URL of the crowd account being connected to, default is /crowd/services/<your server name>
+  credentials: #Password for the server to authenticate to crowd
+  adminGroups: #List of groups in crowd granted the right to review issues within the console
+    - #Group1@domain
+    - #Group2@domain
+
+static_content: #full path to the public folder containing public static content

@@ -1,0 +1,34 @@
+//- Extends the layout template, which in this case keeps the top frame and css the same across all pages
+extends layout
+
+//- Adds the first set of code to the layout, in this case, sets the page title
+block title
+  #{ reportTitle }
+  
+block includes  
+  link( rel='stylesheet', href='/static-issues.css' )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/amcharts.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/pie.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/themes/dark.js" )
+  script( type="text/javascript", src="/lib/js/line-graph-functions.js" )
+  
+  script
+    var valueField = "#{ valueField }";
+    var titleField = "#{ titleField }";
+    var data = !{ data };
+  
+    AmCharts.makeChart( "container", {
+      type : "pie",
+      theme : "dark",
+      dataProvider : data,
+      titleField : titleField,
+      valueField : valueField,
+      legend: {
+        useGraphSettings : true
+      }
+    } );
+    
+block mainContent
+  //- A section to create a list of selectors to determine the data contained in the report
+  block selectors
+  div( id="container", style="width: 100%; height: 500px" )

@@ -1,0 +1,84 @@
+div.hidden( id="#{ issue.updateVal }" )
+  div.metadata
+    | Date Found: #{ issue.date }
+    br
+    | Application: #{ issue._id.app }
+    br
+    |  Project: #{ issue._id.project_name }
+    br
+    | Confidence: #{ issue._id.conf }
+    br
+    | Severity: #{ issue._id.sev }
+  div.permlink
+    a( href="/static_issues/permlink?id=#{ issue.updateVal }"  ).
+      Permanent Link 
+  div.reviewdata
+    if issue.review != null
+      | Reviewed By: #{ issue.reviewUser }
+      | Date Reviewed: #{ issue.reviewDate }
+  div.information
+    table.information
+      tbody
+        tr
+          td
+            div.var Filename:
+          td
+            div.val #{ issue._id.file }
+        tr
+          td
+            div.var Method:
+          td
+            div.val #{ issue._id.method }
+        tr
+          td 
+            div.var Vulnerability Type:
+          td
+            div.val #{ issue._id.vtype }
+        if issue._id.caller != null
+          tr 
+            td
+              div.var Caller:
+            td
+              div.val #{ issue._id.caller }
+        tr.hidden
+          td
+            div.var Trace Data:
+          td
+            div.val( id="trace" )
+              table.issues.taintTrace
+                tbody
+                  tr.issues 
+                    th.issues ID
+                    th.issues Parent_ID
+                    th.issues File Name
+                    th.issues Method
+                    th.issues Line
+                    th.issues Argument Name
+  div.code( id="hidden" )
+  span.hidden( id="ln" ) #{ issue._id.ln }
+  div.reviewForm
+    form.review( method="POST", name="review", action="/reviewStaticIssue" )
+      input( type="hidden", value="#{ issue.updateVal }", name="_id" )
+      input( type="hidden", value="#{ _csrf }", name="_csrf" )
+      input( type="hidden", value="#{ issue._id.app }", name="app" )
+      input( type="hidden", value="#{ issue._id.project_name }", name="project" )
+      div.radio
+        if issue.reviewStatus[ 0 ] == "false_positive"
+          input.radio( type="radio", value="false_positive", name="issue_type", checked )
+        else
+          input.radio( type="radio", value="false_positive", name="issue_type" )
+        | False Positive
+        if issue.reviewStatus[ 0 ] == "valid"
+          input.radio( type="radio", value="valid", name="issue_type", checked )
+        else
+          input.radio( type="radio", value="valid", name="issue_type" )
+        | Valid Issue
+      div.textbox
+        if issue.reviewStatus[ 0 ] == "false_positive"
+          input.textbox( type="text", value="", size="92", name="description", value="#{ issue.fpreason[ 0 ] }" )
+        else if issue.reviewStatus[ 0 ] == "valid"
+          input.textbox( type="text", value="", size="92", name="description", value="#{ issue.vreason[ 0 ] }" )
+        else
+          input.textbox( type="text", value="", size="92", name="description" )
+      div.review
+        input.review( type="Submit", value="Review", name="review" )

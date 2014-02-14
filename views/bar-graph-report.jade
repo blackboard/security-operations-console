@@ -1,0 +1,62 @@
+//- Extends the layout template, which in this case keeps the top frame and css the same across all pages
+extends layout
+
+//- Adds the first set of code to the layout, in this case, sets the page title
+block title
+  #{ reportTitle }
+
+//- Adds data to the includes section, in this case includes some javascript, and additionally creates data 
+//- for displaying the report. Includes, in this case, might not be an appropriate name for this block
+block includes  
+  link( rel='stylesheet', href='/static-issues.css' )
+  //- Imports additional functions needed by the reports
+  script( type="text/javascript", src="/lib/js/bar-graph-functions.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/amcharts.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/serial.js" )
+  script( type="text/javascript", src="/lib/amcharts/amcharts/themes/dark.js" )
+  
+  script
+    var cwe = new Cwe();
+    var fields = [];
+    var data = [];
+  
+  for field in valueFields
+    script
+      fields.push( { id : "#{ field.id }", label : "#{ field.label }" } );
+  
+  for item in data
+    script
+      data.push( { categoryName : "#{ item.categoryName }", unreviewed : "#{ item.unreviewed }", valid : "#{ item.valid }", fp : "#{ item.fp }", total : "#{ item.total }", type : "#{ item.type }" } );
+  
+  script
+    var graphs = []
+    for( iter in fields )
+    {
+      graphs.push( {
+        type : "column",
+        title : fields[ iter ].label,
+        valueField : fields[ iter ].id,
+        fillAlphas : 1
+      } );
+    }
+  
+    var chart = AmCharts.makeChart( "container", {
+      type : "serial",
+      theme : "dark",
+      dataProvider : data,
+      categoryField : "#{ categoryField }",
+      rotate : true,
+      titles : [ { 'text' : '#{ reportTitle }', size : 14 } ],
+      graphs : graphs,
+      legend: {
+        useGraphSettings : true
+      }
+    } );
+    
+    chart.addListener( "clickGraphItem", cwe.callbackForInitialCwe );
+
+//- The main content block. In this case, just displays the report    
+block mainContent
+  //- A section to create a list of selectors to determine the data contained in the report
+  block selectors
+  div( id="container", style="width: 100%; height: #{ pixels }px" )

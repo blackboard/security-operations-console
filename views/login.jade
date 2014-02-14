@@ -1,0 +1,28 @@
+extends layout
+
+block title
+  title Operations Console
+
+block includes
+  link( rel='stylesheet', href='/login.css' )
+  script( type="text/javascript", src="/lib/js/login-functions.js" )
+  
+block mainContent
+  div( class="container")
+    form( name="login", action="/authenticate", method="POST" )
+      input( type="hidden", name="_csrf", value=_csrf )
+      div( class="label" )
+        | Username:
+      div( class="input" )
+        input( type="text", name="user[username]", class="text" )
+      div( class="label" )
+        | Password: 
+      div( class="input" )
+        input( type="password", name="user[password]", class="text", autocomplete="off" )
+      div( class="spacer" )
+      div
+        input( type="submit", name="submit" )
+  iframe( seamless="true", src="/javadoc/index.html", class="javadoc" )
+    | Missing Javadoc iframe
+  iframe( seamless="true", src="/coverage/lcov-report/index.html", class="coverage" )
+    | Missing code coverage iframe

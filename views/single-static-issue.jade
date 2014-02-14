@@ -1,0 +1,100 @@
+extends layout
+
+block title
+  title Static Issues List
+block includes
+  link( rel='stylesheet', href='/issues.css' )
+  link( rel='stylesheet', href='/static-issues.css' )
+  link( rel='stylesheet', href='/permlink.css' )
+  script( type="text/javascript", src='/lib/js/display-permlink.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/esapi-compressed.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/resources/i18n/ESAPI_Standard_en_US.properties.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/resources/Base.esapi.properties.js' )
+  script( type="text/javascript", src='/lib/js/static-issues.js' )  
+  script( type="text/javascript", src='/lib/js/static-analysis-common.js' )
+    
+block mainContent
+  div.metadata
+    | Date Found: #{ issue.date }
+    br
+    | Application: #{ issue.application_name }
+    br
+    |  Project: #{ issue.project_name }
+    br
+    | Confidence: #{ issue.conf }
+    br
+    | Severity: #{ issue.sev }
+  div.permlink
+    a( href="/static_issues/permlink?id=#{ issue._id }"  ).
+      Permanent Link 
+  div.reviewdata
+    if issue.review != null
+      | Reviewed By: #{ issue.review.user }
+      br
+      | Date Reviewed: #{ issue.review.date }
+  div.information( id="#{ issue._id }" )  
+    table.information
+      tbody
+        tr
+          td
+            div.var Filename:
+          td
+            div.val #{ issue.file_path }
+        tr
+          td
+            div.var Method:
+          td
+            div.val #{ issue.method }
+        tr
+          td 
+            div.var Vulnerability Type:
+          td
+            div.val #{ issue.vtype }
+        if issue._id.caller != null
+          tr 
+            td
+              div.var Caller:
+            td
+              div.val #{ issue.caller }
+        tr.hidden
+          td
+            div.var Trace Data:
+          td
+            div.val( id="trace" )
+              table.issues.taintTrace
+                tbody
+                  tr.issues 
+                    th.issues ID
+                    th.issues Parent_ID
+                    th.issues File Name
+                    th.issues Method
+                    th.issues Line
+                    th.issues Argument Name
+  div.code( id="hidden" )
+  span.hidden( id="ln" ) #{ issue.ln }
+  div.reviewForm
+    form.review( method="POST", name="review", action="/reviewStaticIssue" )
+      input( type="hidden", value="#{ issue._id }", name="_id" )
+      input( type="hidden", value="#{ _csrf }", name="_csrf" )
+      input( type="hidden", value="#{ issue.application_name }", name="app" )
+      input( type="hidden", value="#{ issue.project_name }", name="project" )
+      div.radio
+        if issue.review && issue.review.status == "false_positive"
+          input.radio( type="radio", value="false_positive", name="issue_type", checked )
+        else
+          input.radio( type="radio", value="false_positive", name="issue_type" )
+        | False Positive
+        if issue.review && issue.review.status == "valid"
+          input.radio( type="radio", value="valid", name="issue_type", checked )
+        else
+          input.radio( type="radio", value="valid", name="issue_type" )
+        | Valid Issue
+      div.textbox
+        if issue.review && issue.review.status == "false_positive"
+          input.textbox( type="text", value="", size="92", name="description", value="#{ issue.review.false_positive_reason }" )
+        else if issue.review && issue.review.status == "valid"
+          input.textbox( type="text", value="", size="92", name="description", value="#{ issue.review.ticket_number }" )
+        else
+          input.textbox( type="text", value="", size="92", name="description" )
+      div.review
+        input.review( type="Submit", value="Review", name="review" )

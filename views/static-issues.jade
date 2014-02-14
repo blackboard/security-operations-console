@@ -1,0 +1,48 @@
+extends layout
+
+block title
+  title Static Issues List
+
+block includes
+  link( rel='stylesheet', href='/issues.css' )
+  link( rel='stylesheet', href='/static-issues.css' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/esapi-compressed.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/resources/i18n/ESAPI_Standard_en_US.properties.js' )
+  script( type="text/javascript", src='/lib/esapi4js-0.1.3/resources/Base.esapi.properties.js' )
+  script( type="text/javascript", src='/lib/js/static-issues.js' )  
+  script( type="text/javascript", src='/lib/js/static-analysis-common.js' )
+    
+block mainContent
+  include application-selector.jade
+  include project-selector.jade
+  div.count Finding Count: #{ scanners.length }
+  include static-issue-selectors.jade
+  div.buttonRow( id="type" )
+    div.selector new
+    div.selector valid
+    div.selector false_positive
+    div.selector reviewed
+    div.selector all
+  table.issues
+    tr.issues
+      th.issues Filename
+      th.issues Vulnerability
+      th.issues Vulnerability Type
+      th.issues Line Number
+      th.issues Severity
+      th.issues Confidence
+    for issue in scanners
+      tr.issues( id="#{ issue.updateVal }" )
+        td.issues 
+          div.issues #{ issue._id.file }
+        td.issues 
+          div.vulnerabilityMethod #{ issue._id.method }
+        td.issues
+          div.issues #{ issue._id.vtype }
+        td.issues
+          div.lineNumber #{ issue._id.ln }
+        td.issues
+          div.severity #{ issue._id.sev }
+        td.issues
+          div.conf #{ issue._id.conf } 
+          include static-issue-details.jade

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Testing</title>
+    <script src="../public/lib/jquery/jquery-1.8.2.min.js"></script>
+    <script src="../public/lib/jquery/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="../public/lib/amcharts/amcharts/amcharts.js"></script>
+    <script src="../public/lib/amcharts/amcharts/themes/light.js"></script>
+    <script src="../public/lib/amcharts/amcharts/serial.js"></script>
+  </head>
+  <body>
+    <div id="test" style="width:600px;height:400px"></div>
+    <script>
+      var data = [
+        {
+          y : 'test1',
+          a : 12, 
+          b : 4
+        },
+        {
+          y : '<foreignobject><a xlink:href="#">test2</a></foreignobject>',
+          a : 41,
+          b : 12
+        }
+      ];
+      
+      AmCharts.makeChart( "test", {
+        type : "serial",
+        theme : "light",
+        dataProvider : data,
+        categoryField : 'y',
+        rotate : true,
+        titles : [ { 'text' : 'title', size : 14 } ],
+        graphs : [ {
+          type : "column",
+          title : "A",
+          valueField : "a",
+          fillAlphas : 1
+        },{
+          type : "column",
+          title : "B",
+          valueField : "b",
+          fillAlphas : 1
+        } ],
+        legend: {
+          useGraphSettings: true
+        }
+      } );
+    </script>
+  </body>
+</html>

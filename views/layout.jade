@@ -1,0 +1,84 @@
+//-
+  This is essentially the same as the frameset page. Included in this page is the "top frame", the CSS, and all of the 
+  includes and other code that must exist on all pages
+  
+!!! 5
+html(lang="en")
+  head
+    block title
+    //- Adds the sites' CSS to the page
+    link( rel='stylesheet', href='/stylesheet.css' )
+    link( rel='stylesheet', href='/lib/colorbox/colorbox.css' )
+    //- Adds the javascript libraries to the page
+    script( type='text/javascript', src='/lib/jquery/jquery-1.8.2.min.js' ) 
+    script( type='text/javascript', src='/lib/colorbox/jquery.colorbox-min.js' )
+    block includes
+    //- The script below controls the behavior of the menu and submenus
+    script( type='text/javascript' )
+      $(document).ready( function(){
+    
+        $("div.tab").mouseenter( function() {
+          var tags = [];
+          
+          $( "div.submenu" ).css( "display", "none" )
+          var id =  $( this ).attr( 'id' );
+          switch( id ) {
+            case "issue":
+              tags = $( "div.issuesSubmenu" );
+              break;
+            case "staticIssues":
+              tags = $( "div.staticIssuesSubmenu" );
+              break;
+            case "reports": 
+              tags = $( "div.reportSubmenu" );
+              break;
+          }
+          
+          $( "div.subarea" ).css( "display", "inline-table" );
+          if( tags ) {
+            tags.css( "display", "inline-table" );
+          }
+        });
+        
+        $("div.top").mouseleave( function() {
+          var tags = [];
+          var id =  $( this ).attr( 'id' );
+          
+          $( "div.subarea" ).css( "display", "none" );
+          $( "div.submenu" ).css( "display", "none" )
+        });
+      });
+      
+  body
+    //- This segment contains all of the menu and submenu objects
+    div.top
+      div.auth
+        a( href="/logout" ) Log Out
+      div.tabPanel
+        div.tab( id="issue" )
+          a( href="/index" ) Dynamic Issues
+        div.tab( id="staticIssues")
+          a( href="/static_issues?app=achievements&conf=Vulnerability&sev=High" ) Static Issues
+        div.tab( id="reports" )
+          a( href="/report" ) Reports
+      div.subarea
+        div.submenu.issuesSubmenu
+          a( href="/index?type=new" ) New Issues
+        div.submenu.issuesSubmenu
+          a( href="/index?type=reviewed" ) Reviewed Issues
+        div.submenu.issuesSubmenu
+          a( href="/index?type=all" ) All Issues
+        div.submenu.staticIssuesSubmenu
+          a( href="/static_issues?type=new&conf=Vulnerability&sev=High" ) New Static Issues
+        div.submenu.staticIssuesSubmenu
+          a( href="/static_issues?type=reviewed&conf=Vulnerability&sev=High" ) Reviewed Static Issues
+        div.submenu.staticIssuesSubmenu
+          a( href="/static_issues?type=all&conf=Vulnerability&sev=High" ) All Static Issues
+        div.submenu.reportSubmenu
+          a( href="/report?report=cwe" ) CWE Report
+        div.submenu.reportSubmenu
+          a( href="/report?report=vulnType&conf=Vulnerability&sev=High" ) Vulnerability Type 
+        div.submenu.reportSubmenu
+          a( href="/report?report=issuesByDate") Issues By Date
+    div.body
+      block mainContent

@@ -1,0 +1,10 @@
+if error
+  div.error
+    span.errorHeader
+      | Error received on last click:
+    span.errorText
+      script
+        document.write( $ESAPI.encoder().encodeForHTML( $ESAPI.encoder().cananicalize( "#{ error.header }" ) ) );
+      br
+      script
+        document.write( new Date( "#{ error.date }" ) );
