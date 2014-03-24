@@ -1,6 +1,8 @@
 var crowd = require( '../authentication/crowd.js' );
 var xssUtil = require( '../security/xss-util.js' );
 var logger = require( './new-logger.js' );
+var passwordManagement = require( '../authentication/password-management.js' );
+var helper = require( '../helpers.js' );
 
 var event = require( 'events' );
 var fs = require( 'fs' );
@@ -50,6 +52,14 @@ var config =
   _crowdCredentials : null,
   /** crowd groups that have admin privileges */
   _crowdAdminGroups : null,
+  /** crowd username for ops console */
+  _crowdUsername : null,
+  /** Password management server hostname */
+  _pmpHostname : null,
+  /** Authentication token for the pmp server */
+  _pmpAuthtoken : null,
+  /** The port for the pmp server */
+  _pmpPort : null,
   /** @class set of logs for the application */
   _logs : {
     /** The logger for all application exceptions */
@@ -219,13 +229,15 @@ var config =
    * @param {string} hostname The hostname of the crowd server
    * @param {string} url The URL used in the soap request for the hostname
    * @param {boolean} ssl Whether the SOAP request to crowd uses SSL or not
+   * @param {string} username The crowd username for the server (could be null if pmp server is used)
+   * @param {string} credentials The crowd password for the server (could be null if pmp server is used
    * @param {Array} adminGroups The set of groups that have admin privileges in this tool
    * 
    * @throws exception if hostname is not a string
    * @throws exception if url is not a string
    * @throws exception if ssl is not true or false  
    */
-  configureCrowdParameters : function( hostname, url, ssl, credentials, adminGroups )
+  configureCrowdParameters : function( hostname, url, ssl, username, credentials, adminGroups )
   {
     //verifies that hostname is passed in as a string from the config file 
     if( typeof hostname != 'string' )
@@ -259,11 +271,16 @@ var config =
     //sets the two crowd parameters
     this._crowdServer = hostname;
     this._crowdAuthUrl = protocol + '://' + hostname + url;
+    this._crowdUsername = username;
     this._crowdCredentials = credentials;
+    this._crowdAdminGroups = adminGroups;
     
     //connect the server to crowd
-    crowd.authenticateServer( this._crowdAuthUrl, credentials );
-    
+    if( this._crowdUsername != null && this._crowdCredentials != null )
+    {
+      crowd.authenticateServer( this._crowdAuthUrl, username, credentials );
+    }
+
     this._logs.info.log( 'info', 'Connected to Crowd authentication server' );
     this._ee.emit( 'config' );
   },
@@ -309,6 +326,39 @@ var config =
     
     //emitting the config event
     this._ee.emit( 'config' );
+  },
+
+  /**
+   * Function to set the pmpHostname property, allowing us to pull passwords from the pmp server
+   *
+   * @param {string} hostname The Password Management server hostname
+   * @param {string} port The port number for the pmp server
+   * @param {string} authToken The pmp auth token assigned to the server
+   */
+  setPmpHostname : function( hostname, port, authToken )
+  {
+    this._pmpHostname = hostname;
+    this._pmpPort = port;
+    this._pmpAuthtoken = authToken;
+
+    this._ee.once( 'complete', function( error )
+    {
+      if( !error )
+      {
+        config._crowdUsername = passwordManagement.username;
+        config._crowdCredentials = passwordManagement.password;
+
+        crowd.authenticateServer( config._crowdAuthUrl, config._crowdUsername, config._crowdCredentials );
+        config._ee.emit( 'config' );
+      }
+      else
+      {
+        config._logs.exceptions.log( 'error', "Error retrieving crowd password", error );
+      }
+    } );
+
+    helper.setConfig( this );
+    passwordManagement.getAccountInfo( this._ee );
   }
 };
 

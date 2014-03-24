@@ -2,6 +2,8 @@ var helpers = require( '../models/helpers.js' );
 var xssUtil = require( '../models/security/xss-util.js' );
 var crowd = require( '../models/authentication/crowd.js' );
 
+var accessMongo = require( '../models/pull-report-data.js' );
+
 var http = require( 'http' );
 var querystring = require( "querystring" );
 var event = require( 'events' );
@@ -110,6 +112,9 @@ var authentication = {
     //Gets the username and password from the body of the request
     var authInfo = req.body.user;
     var config = helpers.getConfig();
+
+    //redirect location 
+    var newLoc = req.body.new_loc;
   
     //pulling username and password into local variables from the request object
     var username = authInfo.username;
@@ -130,7 +135,14 @@ var authentication = {
       ee.once( 'addPermissions', function( permissions ) 
       {
         req.session.permissions = permissions;
-        res.redirect( '/index' );
+        if( newLoc )
+        {
+          res.redirect( newLoc );
+        }
+        else
+        {
+          res.redirect( '/index' );
+        }
       });
     
       //handler to receive response from scala server. Requires the output from scala, the request object, and the response object

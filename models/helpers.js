@@ -70,7 +70,7 @@ var helpers = {
     //if the user is missing a session id or a valid username in their session, direct them to log in again
     else 
     {
-      res.redirect( '/' );
+      res.redirect( '/?new_loc=' + encodeURIComponent( req.originalUrl ) );
     }
   },
   

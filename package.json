@@ -23,7 +23,7 @@
     "jasmine-node": "1.9.x",
     "jsdoc2": "x.x.x",
     "grunt": "0.4.x",
-    "grunt-jasmine-node" : "0.x.x",
+    "grunt-jasmine-node" : "0.1.x",
     "grunt-bg-shell" : "2.x.x",
     "grunt-jsdoc" : "0.x.x"
   },

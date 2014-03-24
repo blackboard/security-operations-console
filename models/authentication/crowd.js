@@ -16,12 +16,16 @@ crowd = {
   
   /**
    * The function to authenticate a server to Crowd. To be called if ever the server token is no longer valid.
-   *  
+   *
+   * @param {string} url The url of the crowd server, as contained in the config object
+   * @param {string} username The username of the server
+   * @param {string} credentials The password of the server
+   *
    * @throws an error if config._crowdAuthUrl is null
    * @throws an error if the authentication request comes back with an error
    * @throws an error if 
    */
-  authenticateServer : function( url, credentials )
+  authenticateServer : function( url, username, credentials )
   {
     //making sure the url is passed in properly, otherwise throw an error into the logs
     if( !url )
@@ -39,7 +43,7 @@ crowd = {
                           '<aut:credential>' +
                             '<aut:credential>' + credentials + '</aut:credential>' +
                           '</aut:credential>' +
-                          '<aut:name>security-console</aut:name>' +
+                          '<aut:name>' + username + '</aut:name>' +
                         '</urn:in0>' +
                       '</urn:authenticateApplication>' +
                     '</soapenv:Body>' +
@@ -105,7 +109,7 @@ crowd = {
     
     //re-authenticating the server to crowd on each login, due to infrequent login, temporary until todo sections
     //below are complete 
-    this.authenticateServer( config._crowdAuthUrl, config._crowdCredentials );
+    this.authenticateServer( config._crowdAuthUrl, config._crowdUsername, config._crowdCredentials );
     
     //making sure the url is passed in properly, otherwise throw an error into the logs
     if( config._crowdAuthUrl == null )

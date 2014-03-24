@@ -348,7 +348,7 @@ describe( "Testing functionality for pulling report data out of the MongoDB", fu
       {
         callback( null, 10 );
       } );
-      find = jasmine.createSpy( "find" ).andCallFake( function(  query, callback )
+      find = jasmine.createSpy( "find" ).andCallFake( function(  query, item, options, callback )
       {        
         if( callback )
         {
@@ -398,11 +398,11 @@ describe( "Testing functionality for pulling report data out of the MongoDB", fu
       
       expect( function() { accessMongo.find( {}, db, "test", ee, true ); } ).not.toThrow();
       
-      find.andCallFake( function( query, callback )
+      find.andCallFake( function( query, items, options, callback )
       {
         callback( "Error" );
       } );
-      
+
       expect( function() { accessMongo.find( {}, db, "test", ee, false ); } ).not.toThrow();
       
       db.collection.andCallFake( function( name, callback )

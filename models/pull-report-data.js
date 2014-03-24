@@ -206,8 +206,10 @@ var pull_report_data = {
    * @param {Object} ee The eventEmitter object to return results
    * @param {boolean} count True if we only want a count returned, false otherwise
    * @param {Object} [output] Optional parameters to identify the results later
+   * @param {Object} [fields] Optional parameter determining the limited set of fields to return
+   * @param {Object} [options] Optional parameter to set options, such as limit
    */
-  find : function( query, db, collectionName, ee, count, output )
+  find : function( query, db, collectionName, ee, count, output, fields, options )
   {
     //connect to the collection where we want to grab data
     db.collection( collectionName, function( err, collection )
@@ -217,7 +219,7 @@ var pull_report_data = {
         if( !count )
         {
           //find the data in the collection based on the query generating a count of the results
-          collection.find( query, function( findErr, results )
+          collection.find( query, fields, options, function( findErr, results )
           {
             if( !findErr )
             {
@@ -232,7 +234,7 @@ var pull_report_data = {
         //find the data we're looking for, and emit all of the results
         else
         {
-          collection.find( query ).count( function( countErr, count )
+          collection.find( query, fields, options ).count( function( countErr, count )
           {
             if( !countErr )
             {
@@ -240,7 +242,7 @@ var pull_report_data = {
             }
             else
             {
-              ee.emit( "Error", err );
+              ee.emit( "Error", countErr );
             }
           } );
         }

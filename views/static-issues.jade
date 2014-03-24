@@ -25,6 +25,7 @@ block mainContent
     div.selector all
   table.issues
     tr.issues
+      th.issues ID
       th.issues Filename
       th.issues Vulnerability
       th.issues Vulnerability Type
@@ -33,6 +34,8 @@ block mainContent
       th.issues Confidence
     for issue in scanners
       tr.issues( id="#{ issue.updateVal }" )
+        td.issues
+          div.issues #{ issue.updateVal }
         td.issues 
           div.issues #{ issue._id.file }
         td.issues 

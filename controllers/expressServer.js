@@ -19,6 +19,7 @@ var querystring = require( 'querystring' );
 
 var event = require( 'events' );
 var fs = require( 'fs' );
+var os = require( 'os' );
 
 var app = null;
 var counter = 0;
@@ -48,18 +49,21 @@ var startListener = function()
   try 
   {
     //starting the listener via https instead of express, so that we can use SSL
-    sslServer = https.createServer( sslOptions, app );  
+    sslServer = https.createServer( sslOptions, app );
     sslServer.listen( config._port );
-    
+
     //Adding Redirect port to redirect from 80 to 443
     httpServer = http.createServer( helpers.redirectToHttps );
     httpServer.listen( config._httpPort );
-    
-    //Because 80 and 443 are privileged ports, root is required to use it. Resetting the user to jenkins (temporary, until done
-    //programattically to reset to calling user account) avoids server security issues if a vulnerability is found and exploited
-    process.setgid( 'jenkins' );
-    process.setuid( 'jenkins' );
-    
+
+    if( os.platform() != 'win32' )
+    {
+      //Because 80 and 443 are privileged ports, root is required to use it. Resetting the user to jenkins (temporary, until done
+      //programattically to reset to calling user account) avoids server security issues if a vulnerability is found and exploited
+      process.setgid( 'jenkins' );
+      process.setuid( 'jenkins' );
+    }
+
     info.log( 'info', 'Ports open', { http : config._httpPort, ssl : config._port } );
   }
   catch( err )
@@ -79,7 +83,7 @@ config._ee.once( 'server configured', startListener );
 config._ee.on( 'config', function()
 {
   counter = counter + 1;
-  if( counter == 12 )
+  if( counter == 13 )
   {
     app = expressServer.app;
     config._ee.emit( "server configured" );
@@ -111,7 +115,9 @@ config.configureSslParameters( configParams.node.ssl.keyFile, configParams.node.
 
 //configures the parameters necessary to authenticate to crowd
 config.configureCrowdParameters( configParams.crowd.hostname, configParams.crowd.url, configParams.crowd.ssl, 
-                                 configParams.crowd.credentials, configParams.crowd.adminGroups );
+                                 configParams.crowd.username, configParams.crowd.credentials, configParams.crowd.adminGroups );
+config.setPmpHostname( configParams.passwordManager.hostname, configParams.passwordManager.port,
+                       configParams.passwordManager.auth_token );
 
 //configuration for the Express server, includes libraries (jade, stylus, cookies), as well as additional functionality we're using
 //properties stored in the config filess
@@ -265,7 +271,9 @@ expressServer.app.get( '/', function( req, res )
   {
     info.log( 'info', 'Presenting the login page' );
     
-    res.render( 'login.jade', { _csrf : csrfUtil.addTokenToForm( req, res ) } );
+    var new_loc = req.query.new_loc;
+
+    res.render( 'login.jade', { _csrf : csrfUtil.addTokenToForm( req, res ), new_loc : encodeURI( new_loc ) } );
   }
 } );
 

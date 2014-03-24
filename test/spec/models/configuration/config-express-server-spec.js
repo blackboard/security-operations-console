@@ -264,11 +264,12 @@ describe( "Testing the config-express-server file", function()
       
       it( "sets the _crowdServer, _crowdAuthUrl parameters, and connects to the crowd server", function()
       {
-        expect( function() { conf.configureCrowdParameters( 'hostname', '/url', true, "pass" ); } ).not.toThrow();
+        expect( function() { conf.configureCrowdParameters( 'hostname', '/url', true, "user", "pass", [ 1, 2 ] ); } ).not.toThrow();
         
         expect( conf._crowdServer ).toEqual( 'hostname' );
         expect( conf._crowdAuthUrl ).toEqual( 'https://hostname/url' );
         expect( conf._crowdCredentials ).toEqual( 'pass' );
+        expect( conf._crowdUsername).toEqual( 'user' );
         expect( crowd.authenticateServer ).toHaveBeenCalled();
         expect( conf._ee.emit ).toHaveBeenCalled();
       } );
@@ -298,6 +299,18 @@ describe( "Testing the config-express-server file", function()
         expect( function() { conf.configureCrowdParameters( 'hostname', 'url', { bool : false } ); } ).toThrow();
         expect( crowd.authenticateServer ).not.toHaveBeenCalled();
         expect( conf._ee.emit ).not.toHaveBeenCalled();
+      } );
+
+      it( "does not set the username and password if they are null, and does not authenticate server to crowd", function()
+      {
+        expect( function() { conf.configureCrowdParameters( 'hostname', '/url', true, null, null, [ 1, 2 ] ); } ).not.toThrow();
+
+        expect( conf._crowdServer ).toEqual( 'hostname' );
+        expect( conf._crowdAuthUrl ).toEqual( 'https://hostname/url' );
+        expect( conf._crowdCredentials ).toBeNull();
+        expect( conf._crowdUsername).toBeNull();
+        expect( crowd.authenticateServer ).not.toHaveBeenCalled();
+        expect( conf._ee.emit ).toHaveBeenCalled();
       } );
     } );
     
@@ -337,7 +350,53 @@ describe( "Testing the config-express-server file", function()
         expect( conf._logs.security ).not.toBeUndefined();
         expect( conf._logs.info ).not.toBeUndefined();
       } );
-    } ); 
+    } );
+
+    describe( "Testing the setPmpHostname function", function()
+    {
+      var crowd = require( '../../../../models/authentication/crowd.js' );
+      var passwordManagement = require( '../../../../models/authentication/password-management.js' );
+      beforeEach( function()
+      {
+        conf._ee.emit.andCallThrough();
+        spyOn( crowd, 'authenticateServer' );
+        spyOn( passwordManagement, 'getAccountInfo' ).andCallFake( function( ee )
+        {
+          passwordManagement.username = 'user';
+          passwordManagement.password = 'pass';
+          ee.emit( 'complete' );
+        } );
+
+        conf._logs.exceptions = {
+          log : function() {}
+        }
+      } );
+
+      it( "sets the _pmpHostname, _pmpPort, and _pmpAuthtoken parameters, if they exist, and authenticates the console to crowd", function()
+      {
+        expect( function() { conf.setPmpHostname( "test", "1", "token" ); } ).not.toThrow();
+        expect( conf._ee.emit ).toHaveBeenCalledWith( 'config' );
+        expect( conf._pmpHostname ).toEqual( "test" );
+        expect( conf._pmpPort).toEqual( "1" );
+        expect( conf._pmpAuthtoken ).toEqual( "token" );
+        expect( crowd.authenticateServer ).toHaveBeenCalledWith( "https://hostname/url", 'user', 'pass' );
+      } );
+
+      it( "does not emit the config event if an error was sent back with the complete event", function()
+      {
+        passwordManagement.getAccountInfo.andCallFake( function( ee )
+        {
+          ee.emit( 'complete', { status : "Failed" } );
+        } );
+
+        expect( function() { conf.setPmpHostname( "test", "1", "token" ); } ).not.toThrow();
+        expect( conf._ee.emit ).not.toHaveBeenCalledWith( 'config' );
+        expect( conf._pmpHostname ).toEqual( "test" );
+        expect( conf._pmpPort).toEqual( "1" );
+        expect( conf._pmpAuthtoken ).toEqual( "token" );
+        expect( crowd.authenticateServer ).not.toHaveBeenCalledWith( undefined, 'user', 'pass' );
+      } );
+    } );
   } );
   
   describe( "Testing the expressServer object", function() 

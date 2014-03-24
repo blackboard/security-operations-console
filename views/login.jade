@@ -21,6 +21,8 @@ block mainContent
         input( type="password", name="user[password]", class="text", autocomplete="off" )
       div( class="spacer" )
       div
+        if new_loc != "null" && new_loc != "undefined"
+          input( type="hidden", name="new_loc", value="#{ new_loc }" )
         input( type="submit", name="submit" )
   iframe( seamless="true", src="/javadoc/index.html", class="javadoc" )
     | Missing Javadoc iframe

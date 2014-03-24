@@ -2,6 +2,7 @@ describe( "Testing authentication code", function()
 {
   var auth = require( '../../../controllers/authentication.js' );
   var helper = require( '../../../models/helpers.js' );
+  var accessMongo = require( '../../../models/pull-report-data.js' );
   
   var config;
   
@@ -22,6 +23,10 @@ describe( "Testing authentication code", function()
     };
     
     helper.setConfig( config );
+    spyOn( accessMongo, 'find' ).andCallFake( function( query, db, collectionName, ee, count, output, fields, options )
+    {
+      ee.emit( 'Find Results', { 'permissions' : 'perm' } );
+    } );
   } );
   describe( "Testing authCheck function", function() 
   {
@@ -304,6 +309,13 @@ describe( "Testing authentication code", function()
       
       expect( function() { auth.authenticate( request, response ); } ).not.toThrow();
       expect( request.session.permissions ).toEqual( 'nothing' );
+    } );
+
+    it( "redirects the user to alternate page if new_loc parameter is set", function()
+    {
+      request.body.new_loc = "/newLoc";
+      expect( function() { auth.authenticate( request, response ); } ).not.toThrow();
+      expect( response.redirect ).toHaveBeenCalledWith( "/newLoc" );
     } );
     
     it( "throws an error if there's an error connecting to the collection", function()

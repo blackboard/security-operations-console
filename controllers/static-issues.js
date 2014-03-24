@@ -370,7 +370,7 @@ var staticIssues = {
     }
     
     //distinct list of applications with number of unreviewed issues
-    var match = { "$match" : { "review.status" : { "$exists" : false } } }; 
+    var match = { "$match" : { "review.status" : { "$exists" : false }, sev : { $ne : "Informational" } } };
     var group = {
       "$group" : {
         _id : { app : "$application_name" },
