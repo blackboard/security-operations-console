@@ -6,7 +6,7 @@
   "dependencies": {
     "config": "0.4.x",
     "connect-mongodb": "1.x.x",
-    "express": "3.2.x",
+    "express": "4.17.x",
     "hashmap": "1.x.x",
     "jade": "0.x.x",
     "js-yaml": "2.x.x",
