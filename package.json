@@ -10,7 +10,7 @@
     "hashmap": "1.x.x",
     "jade": "0.x.x",
     "js-yaml": "2.x.x",
-    "mongodb": "1.1.x",
+    "mongodb": "3.6.x",
     "nib": "0.x.x",
     "stylus": "0.x.x",
     "winston": "0.7.x",
